@@ -12,12 +12,13 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun AddTodoDialog(
+    modifier: Modifier = Modifier,
     onSubmitted: (String) -> Unit,
     onDismissed: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissed) {
         Card(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(220.dp)
                 .padding(16.dp),
