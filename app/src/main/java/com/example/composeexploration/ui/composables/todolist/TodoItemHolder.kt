@@ -19,13 +19,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TodoItemHolder(
+    modifier: Modifier,
     title: String,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onRemove: () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp),
         colors = CardDefaults.cardColors(

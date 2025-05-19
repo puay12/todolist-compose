@@ -1,5 +1,13 @@
 package com.example.composeexploration.ui.screens.todolist
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +35,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,16 +51,29 @@ import com.example.composeexploration.ui.composables.todolist.TodoItemHolder
 import com.example.composeexploration.ui.theme.ComposeExplorationTheme
 import com.example.composeexploration.viewmodel.ToDoListViewModel
 
+@SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 fun ToDoListScreen(
     modifier: Modifier = Modifier,
     toDoListViewModel: ToDoListViewModel = viewModel()
 ) {
     var openDialog by remember { mutableStateOf(false) }
+    val transitionState = remember { MutableTransitionState(false) }
+    val dialogTransition = updateTransition(targetState = transitionState, label = "dialogTransition")
+    val scale by dialogTransition.animateFloat(
+        label = "scale",
+        transitionSpec = { tween(300) }
+    ) { if (openDialog) 1f else 0.8f }
+    val alpha by dialogTransition.animateFloat(
+        label = "alpha",
+        transitionSpec = { tween(300) }
+    ) { if (openDialog) 1f else 0f }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (openDialog) {
         AddTodoDialog(
+            modifier = Modifier.scale(scale).graphicsLayer(alpha),
             onDismissed = { openDialog = false },
             onSubmitted = { title ->
                 toDoListViewModel.addTodoItem(
@@ -128,6 +151,7 @@ fun TodoScreenTitle() {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ToListContents(
     listItem: List<ToDoListItem>,
@@ -140,6 +164,11 @@ fun ToListContents(
             key = { item -> item.id }
         ) { todo ->
             TodoItemHolder(
+                modifier = Modifier.animateItem(
+                    fadeInSpec = tween(durationMillis = 250),
+                    fadeOutSpec = tween(durationMillis = 100),
+                    placementSpec = spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy)
+                ),
                 title = todo.title,
                 isChecked = todo.isCompleted,
                 onCheckedChange = { checked -> onCheckedChange(todo, checked) },
